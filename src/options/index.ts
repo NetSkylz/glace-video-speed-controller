@@ -53,7 +53,8 @@ app.innerHTML = `
       <div class="card">
         ${row('Show controller', 'A small, floating control over your videos.', toggle('showController', 'Show controller'), 'showController')}
         ${row('Position', 'Choose a corner that stays out of your way.', `<select id="position"><option value="top-left">Top left</option><option value="top-right">Top right</option><option value="bottom-left">Bottom left</option><option value="bottom-right">Bottom right</option></select>`, 'position')}
-        ${row('Opacity', 'From barely there to perfectly clear.', '<div class="range-control"><input id="opacity" type="range" min="0.2" max="1" step="0.01"><output for="opacity" id="opacity-value">86%</output></div>', 'opacity')}
+        ${row('Opacity when not hovered', 'How visible the controller is while at rest.', '<div class="range-control"><input id="idleOpacity" type="range" min="0.2" max="1" step="0.01"><output for="idleOpacity" id="idleOpacity-value">50%</output></div>', 'idleOpacity')}
+        ${row('Opacity when hovered', 'Also applies while using the keyboard or dragging.', '<div class="range-control"><input id="opacity" type="range" min="0.2" max="1" step="0.01"><output for="opacity" id="opacity-value">86%</output></div>', 'opacity')}
       </div>
       <div class="section-title" id="shortcuts">${icon('keyboard')}<h2>Keyboard shortcuts</h2></div>
       <p class="shortcut-hint">Click a key to record a shortcut. Add Shift, Ctrl, Alt or ⌘ as needed.<br>Press Escape to cancel, or × to unassign. Shortcuts pause while you type.</p>
@@ -82,6 +83,9 @@ function updatePreview() {
   pill.style.bottom = position.startsWith('bottom') ? '58px' : 'auto';
   const opacity = (document.querySelector<HTMLInputElement>('#opacity')!).value;
   pill.style.setProperty('--preview-opacity', opacity);
+  const idleOpacity = document.querySelector<HTMLInputElement>('#idleOpacity')!.value;
+  pill.style.setProperty('--preview-idle-opacity', idleOpacity);
+  document.querySelector('#idleOpacity-value')!.textContent = `${Math.round(Number(idleOpacity) * 100)}%`;
   pill.style.visibility = (document.querySelector<HTMLInputElement>('#showController')!).checked ? 'visible' : 'hidden';
   const speed = Number((document.querySelector<HTMLInputElement>('#preferredSpeed')!).value);
   document.querySelector('#preview-speed')!.textContent = `${(Number.isFinite(speed) ? speed : 1.5).toFixed(2)}×`;
@@ -93,6 +97,7 @@ function render(value: Settings) {
   booleanKeys.forEach(key => { document.querySelector<HTMLInputElement>(`#${key}`)!.checked = value[key]; });
   document.querySelector<HTMLSelectElement>('#position')!.value = value.position;
   document.querySelector<HTMLInputElement>('#opacity')!.value = String(value.opacity);
+  document.querySelector<HTMLInputElement>('#idleOpacity')!.value = String(value.idleOpacity);
   document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { button.textContent = value.shortcuts[button.dataset.action as Action].code ? formatShortcut(value.shortcuts[button.dataset.action as Action]) : 'Unassigned'; });
   updatePreview();
 }
@@ -104,7 +109,7 @@ function readForm(): Partial<Settings> | null {
     if (values[key] < values.minSpeed || values[key] > values.maxSpeed) document.querySelector<HTMLInputElement>(`#${key}`)!.setCustomValidity('Choose a speed within your minimum and maximum limits.');
   }
   if (!form.reportValidity()) { feedback('Check your speed values before saving.', true); return null; }
-  return { ...values, ...Object.fromEntries(booleanKeys.map(key => [key, document.querySelector<HTMLInputElement>(`#${key}`)!.checked])), position: document.querySelector<HTMLSelectElement>('#position')!.value as Settings['position'], opacity: Number(document.querySelector<HTMLInputElement>('#opacity')!.value) };
+  return { ...values, ...Object.fromEntries(booleanKeys.map(key => [key, document.querySelector<HTMLInputElement>(`#${key}`)!.checked])), position: document.querySelector<HTMLSelectElement>('#position')!.value as Settings['position'], opacity: Number(document.querySelector<HTMLInputElement>('#opacity')!.value), idleOpacity: Number(document.querySelector<HTMLInputElement>('#idleOpacity')!.value) };
 }
 function persist(patch: Partial<Settings>): Promise<Settings | null> {
   pending++;

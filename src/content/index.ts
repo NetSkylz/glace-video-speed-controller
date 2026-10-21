@@ -293,6 +293,7 @@ class Glace {
     state.speed.title = `Reset to ${formatSpeed(this.settings.resetSpeed)}`;
     state.wrapper.classList.toggle('hidden', state.hidden);
     state.host.style.setProperty('--glace-opacity', String(this.settings.opacity));
+    state.host.style.setProperty('--glace-idle-opacity', String(this.settings.idleOpacity));
     const supported = !!document.pictureInPictureEnabled && typeof state.video.requestPictureInPicture === 'function' && !state.video.disablePictureInPicture;
     state.pip.disabled = !supported;
     state.pip.title = supported ? 'Toggle picture-in-picture' : 'Picture-in-picture is unavailable for this video';

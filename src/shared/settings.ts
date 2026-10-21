@@ -14,6 +14,7 @@ export interface Settings {
   rememberSpeed: boolean;
   showController: boolean;
   opacity: number;
+  idleOpacity: number;
   position: Position;
   shortcuts: Record<Action, Shortcut>;
 }
@@ -21,7 +22,7 @@ const key = (code: string): Shortcut => ({ code, alt: false, ctrl: false, meta: 
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true, defaultSpeed: 1, preferredSpeed: 1.5, resetSpeed: 1, step: 0.1,
   minSpeed: 0.1, maxSpeed: 16, seekSeconds: 10, rememberSpeed: true,
-  showController: true, opacity: 0.86, position: 'top-left',
+  showController: true, opacity: 0.86, idleOpacity: 0.5, position: 'top-left',
   shortcuts: { increase: key('KeyD'), decrease: key('KeyS'), reset: key('KeyR'), default: key('KeyB'), preferred: key('KeyG'), toggle: key('KeyV'), pip: key('KeyP'), rewind: key('KeyZ'), forward: key('KeyX'), playPause: key('KeyK') },
 };
 const object = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -53,6 +54,7 @@ export function normalizeSettings(value: unknown): Settings {
     rememberSpeed: typeof input.rememberSpeed === 'boolean' ? input.rememberSpeed : DEFAULT_SETTINGS.rememberSpeed,
     showController: typeof input.showController === 'boolean' ? input.showController : DEFAULT_SETTINGS.showController,
     opacity: number(input.opacity, DEFAULT_SETTINGS.opacity, 0.2, 1),
+    idleOpacity: number(input.idleOpacity, DEFAULT_SETTINGS.idleOpacity, 0.2, 1),
     position: ['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(input.position as string) ? input.position as Position : DEFAULT_SETTINGS.position,
     shortcuts,
   };

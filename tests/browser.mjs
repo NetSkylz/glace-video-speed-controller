@@ -58,6 +58,17 @@ try {
   const collapsedWidth = (await host.boundingBox()).width;
   assert.equal(await pill.evaluate(element => getComputedStyle(element).opacity), '0.5');
   assert.equal(await page.locator('[aria-label="Increase video speed"]').isVisible(), false);
+  await page.evaluate(async () => {
+    await chrome.storage.sync.set({ glaceSettings: { idleOpacity: 0.35, opacity: 0.9 } });
+  });
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-glace-controller]').shadowRoot.querySelector('.pill')).opacity === '0.35');
+  await expand();
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-glace-controller]').shadowRoot.querySelector('.pill')).opacity === '0.9');
+  await page.mouse.move(0, 0);
+  await page.evaluate(async () => {
+    await chrome.storage.sync.set({ glaceSettings: { idleOpacity: 0.5, opacity: 0.86 } });
+  });
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-glace-controller]').shadowRoot.querySelector('.pill')).opacity === '0.5');
   await expand();
   assert.ok((await host.boundingBox()).width > collapsedWidth, 'hover reveals the full controls');
   await page.locator('[aria-label="Increase video speed"]').click();
@@ -264,6 +275,20 @@ try {
   await page.goto(`${base}/options.html`);
   await page.waitForFunction(() => document.querySelector('#app').textContent.length > 100);
   assert.ok(await page.locator('input').count(), 'settings must expose inputs');
+  assert.equal(await page.locator('#idleOpacity').inputValue(), '0.5');
+  for (const [id, value] of [['idleOpacity', '0.35'], ['opacity', '0.9']]) {
+    await page.locator(`#${id}`).fill(value);
+    await page.locator(`#${id}`).dispatchEvent('change');
+  }
+  await page.waitForFunction(async () => {
+    const { glaceSettings } = await chrome.storage.sync.get('glaceSettings');
+    return glaceSettings?.idleOpacity === 0.35 && glaceSettings?.opacity === 0.9;
+  });
+  assert.equal(await page.locator('#idleOpacity-value').textContent(), '35%');
+  await page.mouse.move(0, 0);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#preview-controller')).opacity === '0.35');
+  await page.locator('#preview-controller').hover();
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#preview-controller')).opacity === '0.9');
   await page.locator('#defaultSpeed').fill('1.8');
   await page.locator('#defaultSpeed').blur();
   await page.waitForFunction(async () => (await chrome.storage.sync.get('glaceSettings')).glaceSettings?.defaultSpeed === 1.8);

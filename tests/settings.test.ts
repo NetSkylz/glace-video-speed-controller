@@ -25,6 +25,13 @@ test('numeric settings are finite, bounded, and speeds respect min/max', () => {
   assert.equal(partial.preferredSpeed, 3);
   assert.equal(partial.resetSpeed, 3);
 });
+test('idle opacity defaults for existing settings and normalizes independently of hover opacity', () => {
+  assert.equal(normalizeSettings({ opacity: 0.75 }).idleOpacity, 0.5);
+  assert.equal(normalizeSettings({ idleOpacity: 0.35, opacity: 0.9 }).idleOpacity, 0.35);
+  assert.equal(normalizeSettings({ idleOpacity: -1 }).idleOpacity, 0.2);
+  assert.equal(normalizeSettings({ idleOpacity: 2 }).idleOpacity, 1);
+  assert.equal(normalizeSettings({ idleOpacity: NaN }).idleOpacity, 0.5);
+});
 test('shortcut matching requires exact modifiers and supports unassigned shortcuts', () => {
   const event = { code: 'KeyA', altKey: true, ctrlKey: false, metaKey: false, shiftKey: false };
   const shortcut = shortcutFromEvent(event);
