@@ -3,7 +3,7 @@ import { getSettings, saveSettings, subscribeSettings } from '../shared/storage'
 import { formatShortcut } from '../shared/shortcuts';
 import type { Settings, Action } from '../shared/settings';
 
-const shortcuts: [Action, string][] = [['increase','Speed up'], ['decrease','Slow down'], ['reset','Reset speed'], ['preferred','Preferred speed']];
+const shortcuts: [Action, string][] = [['increase','Speed up'], ['decrease','Slow down'], ['reset','Default speed'], ['preferred','Preferred speed']];
 document.querySelector('#app')!.innerHTML = `<div class="popup">
   <header class="popup-header"><div class="brand"><span class="brand-symbol" aria-hidden="true">❄</span>glace</div><span class="switch"><input id="enabled" type="checkbox" aria-label="Enable Glace" disabled></span></header>
   <p class="tagline">A little more control.</p><h1>Find your own pace.</h1>

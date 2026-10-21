@@ -1,4 +1,4 @@
-export const ACTIONS = ['increase', 'decrease', 'reset', 'default', 'preferred', 'toggle', 'pip', 'rewind', 'forward', 'playPause'] as const;
+export const ACTIONS = ['increase', 'decrease', 'reset', 'preferred', 'toggle', 'pip', 'rewind', 'forward', 'playPause'] as const;
 export type Action = typeof ACTIONS[number];
 export interface Shortcut { code: string; alt: boolean; ctrl: boolean; meta: boolean; shift: boolean }
 export type Position = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -6,7 +6,6 @@ export interface Settings {
   enabled: boolean;
   defaultSpeed: number;
   preferredSpeed: number;
-  resetSpeed: number;
   step: number;
   minSpeed: number;
   maxSpeed: number;
@@ -20,10 +19,10 @@ export interface Settings {
 }
 const key = (code: string): Shortcut => ({ code, alt: false, ctrl: false, meta: false, shift: false });
 export const DEFAULT_SETTINGS: Settings = {
-  enabled: true, defaultSpeed: 1, preferredSpeed: 1.5, resetSpeed: 1, step: 0.1,
+  enabled: true, defaultSpeed: 1, preferredSpeed: 1.5, step: 0.1,
   minSpeed: 0.1, maxSpeed: 16, seekSeconds: 10, rememberSpeed: true,
   showController: true, opacity: 0.86, idleOpacity: 0.5, position: 'top-left',
-  shortcuts: { increase: key('KeyD'), decrease: key('KeyS'), reset: key('KeyR'), default: key('KeyB'), preferred: key('KeyG'), toggle: key('KeyV'), pip: key('KeyP'), rewind: key('KeyZ'), forward: key('KeyX'), playPause: key('KeyK') },
+  shortcuts: { increase: key('KeyD'), decrease: key('KeyS'), reset: key('KeyR'), preferred: key('KeyG'), toggle: key('KeyV'), pip: key('KeyP'), rewind: key('KeyZ'), forward: key('KeyX'), playPause: key('KeyK') },
 };
 const object = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const number = (value: unknown, fallback: number, min: number, max: number) => Math.min(max, Math.max(min, typeof value === 'number' && Number.isFinite(value) ? value : fallback));
@@ -48,7 +47,6 @@ export function normalizeSettings(value: unknown): Settings {
     enabled: typeof input.enabled === 'boolean' ? input.enabled : DEFAULT_SETTINGS.enabled,
     defaultSpeed: number(input.defaultSpeed, DEFAULT_SETTINGS.defaultSpeed, minSpeed, maxSpeed),
     preferredSpeed: number(input.preferredSpeed, DEFAULT_SETTINGS.preferredSpeed, minSpeed, maxSpeed),
-    resetSpeed: number(input.resetSpeed, DEFAULT_SETTINGS.resetSpeed, minSpeed, maxSpeed),
     step: number(input.step, DEFAULT_SETTINGS.step, 0.01, 4), minSpeed, maxSpeed,
     seekSeconds: number(input.seekSeconds, DEFAULT_SETTINGS.seekSeconds, 1, 600),
     rememberSpeed: typeof input.rememberSpeed === 'boolean' ? input.rememberSpeed : DEFAULT_SETTINGS.rememberSpeed,

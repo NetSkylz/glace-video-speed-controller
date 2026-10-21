@@ -11,19 +11,22 @@ test('missing or corrupt storage restores usable defaults without sharing mutabl
   assert.equal(DEFAULT_SETTINGS.shortcuts.increase.code, 'KeyD');
 });
 test('numeric settings are finite, bounded, and speeds respect min/max', () => {
-  const settings = normalizeSettings({ minSpeed: 2, maxSpeed: -1, defaultSpeed: 100, preferredSpeed: -1, resetSpeed: 20, opacity: -1, step: 0, seekSeconds: 99999 });
+  const settings = normalizeSettings({ minSpeed: 2, maxSpeed: -1, defaultSpeed: 100, preferredSpeed: -1, opacity: -1, step: 0, seekSeconds: 99999 });
   assert.equal(settings.minSpeed, 2);
   assert.equal(settings.maxSpeed, 2);
   assert.equal(settings.defaultSpeed, 2);
   assert.equal(settings.preferredSpeed, 2);
-  assert.equal(settings.resetSpeed, 2);
   assert.equal(settings.opacity, 0.2);
   assert.equal(settings.step, 0.01);
   assert.equal(settings.seekSeconds, 600);
   const partial = normalizeSettings({ minSpeed: 3, maxSpeed: 4 });
   assert.equal(partial.defaultSpeed, 3);
   assert.equal(partial.preferredSpeed, 3);
-  assert.equal(partial.resetSpeed, 3);
+});
+test('legacy reset speed is discarded in favor of the shared default speed', () => {
+  const settings = normalizeSettings({ defaultSpeed: 1.75, resetSpeed: 1.25 });
+  assert.equal(settings.defaultSpeed, 1.75);
+  assert.equal('resetSpeed' in settings, false);
 });
 test('idle opacity defaults for existing settings and normalizes independently of hover opacity', () => {
   assert.equal(normalizeSettings({ opacity: 0.75 }).idleOpacity, 0.5);

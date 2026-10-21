@@ -289,8 +289,8 @@ class Glace {
 
   private refresh(state: VideoState): void {
     state.speed.textContent = formatSpeed(state.video.playbackRate);
-    state.speed.setAttribute('aria-label', `Speed ${formatSpeed(state.video.playbackRate)}. Reset to ${formatSpeed(this.settings.resetSpeed)}`);
-    state.speed.title = `Reset to ${formatSpeed(this.settings.resetSpeed)}`;
+    state.speed.setAttribute('aria-label', `Speed ${formatSpeed(state.video.playbackRate)}. Reset to ${formatSpeed(this.settings.defaultSpeed)}`);
+    state.speed.title = `Reset to ${formatSpeed(this.settings.defaultSpeed)}`;
     state.wrapper.classList.toggle('hidden', state.hidden);
     state.host.style.setProperty('--glace-opacity', String(this.settings.opacity));
     state.host.style.setProperty('--glace-idle-opacity', String(this.settings.idleOpacity));
@@ -328,8 +328,7 @@ class Glace {
     switch (action) {
       case 'increase': this.setSpeed(state, video.playbackRate + this.settings.step); break;
       case 'decrease': this.setSpeed(state, video.playbackRate - this.settings.step); break;
-      case 'reset': this.setSpeed(state, this.settings.resetSpeed); break;
-      case 'default': this.setSpeed(state, this.settings.defaultSpeed); break;
+      case 'reset': this.setSpeed(state, this.settings.defaultSpeed); break;
       case 'preferred': this.setSpeed(state, this.settings.preferredSpeed); break;
       case 'toggle': state.hidden = !state.hidden; this.refresh(state); this.scheduleLayout(); break;
       case 'pip': void this.togglePip(state); break;

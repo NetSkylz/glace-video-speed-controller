@@ -11,7 +11,7 @@ const icons = {
 };
 const icon = (name: keyof typeof icons) => `<svg viewBox="0 0 18 18" aria-hidden="true">${icons[name]}</svg>`;
 const shortcutNames: Record<Action, string> = {
-  increase: 'Increase speed', decrease: 'Decrease speed', default: 'Use starting speed', reset: 'Reset speed', preferred: 'Preferred speed',
+  increase: 'Increase speed', decrease: 'Decrease speed', reset: 'Reset to default speed', preferred: 'Preferred speed',
   toggle: 'Show / hide controller', pip: 'Picture in picture', rewind: 'Skip backward', forward: 'Skip forward', playPause: 'Play / pause',
 };
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -41,11 +41,10 @@ app.innerHTML = `
       <div class="section-title" id="general">${icon('speed')}<h2>Playback</h2></div>
       <div class="card">
         ${row('Enable Glace', 'Your controls, on every supported video.', toggle('enabled', 'Enable Glace'), 'enabled')}
-        ${row('Starting speed', 'New videos start here unless a remembered speed takes priority.', numberField('defaultSpeed', 'Starting speed', .0625, 16, 'any'), 'defaultSpeed')}
+        ${row('Default speed', 'New videos start here unless a remembered speed takes priority. Reset returns to this speed.', numberField('defaultSpeed', 'Default speed', .0625, 16, 'any'), 'defaultSpeed')}
         ${row('Preferred speed', 'Your go-to pace, one shortcut away.', numberField('preferredSpeed', 'Preferred speed', .0625, 16, 'any'), 'preferredSpeed')}
         ${row('Speed increment', 'How much each adjustment changes the speed.', numberField('step', 'Speed increment', .01, 4, 'any'), 'step')}
         ${row('Speed limits', 'Keep your playback in a comfortable range.', `<div class="range-pair">${numberField('minSpeed', 'Minimum speed', .0625, 16, 'any')}<span class="range-separator">to</span>${numberField('maxSpeed', 'Maximum speed', .0625, 16, 'any')}</div>`)}
-        ${row('Reset speed', 'Return to this speed with the reset shortcut.', numberField('resetSpeed', 'Reset speed', .0625, 16, 'any'), 'resetSpeed')}
         ${row('Skip interval', 'Jump backward or forward by this amount.', numberField('seekSeconds', 'Skip interval in seconds', 1, 600, 'any', 'sec'), 'seekSeconds')}
         ${row('Remember my speed', 'Pick up at the speed you last used.', toggle('rememberSpeed', 'Remember my speed'), 'rememberSpeed')}
       </div>
@@ -58,7 +57,7 @@ app.innerHTML = `
       </div>
       <div class="section-title" id="shortcuts">${icon('keyboard')}<h2>Keyboard shortcuts</h2></div>
       <p class="shortcut-hint">Click a key to record a shortcut. Add Shift, Ctrl, Alt or ⌘ as needed.<br>Press Escape to cancel, or × to unassign. Shortcuts pause while you type.</p>
-      <div class="card">${Object.entries(shortcutNames).map(([action, label]) => row(label, action === 'default' ? 'Apply your starting speed.' : action === 'reset' ? 'Apply your reset speed.' : action === 'preferred' ? 'Apply your preferred speed.' : '', `<div class="shortcut-control"><button class="shortcut-record" type="button" data-action="${action}" aria-label="Record shortcut for ${label}">—</button><button class="clear-shortcut" type="button" data-clear="${action}" aria-label="Clear shortcut for ${label}">×</button></div>`)).join('')}</div>
+      <div class="card">${Object.entries(shortcutNames).map(([action, label]) => row(label, action === 'reset' ? 'Apply your default speed.' : action === 'preferred' ? 'Apply your preferred speed.' : '', `<div class="shortcut-control"><button class="shortcut-record" type="button" data-action="${action}" aria-label="Record shortcut for ${label}">—</button><button class="clear-shortcut" type="button" data-clear="${action}" aria-label="Clear shortcut for ${label}">×</button></div>`)).join('')}</div>
       <div class="footer"><button class="reset-button" type="button" id="reset">↺ &nbsp; Restore defaults</button><span class="save-status" role="status" aria-live="polite" id="save-status">Loading settings…</span></div>
     </form>
     <div class="footer-meta">MADE FOR A MORE THOUGHTFUL WATCHING EXPERIENCE.</div>
@@ -71,7 +70,7 @@ let settings: Settings;
 let recording: Action | null = null;
 let pending = 0;
 let saveQueue: Promise<unknown> = Promise.resolve();
-const numericKeys = ['defaultSpeed', 'preferredSpeed', 'resetSpeed', 'step', 'minSpeed', 'maxSpeed', 'seekSeconds'] as const;
+const numericKeys = ['defaultSpeed', 'preferredSpeed', 'step', 'minSpeed', 'maxSpeed', 'seekSeconds'] as const;
 const booleanKeys = ['enabled', 'rememberSpeed', 'showController'] as const;
 function feedback(message: string, error = false) { status.textContent = message; status.classList.toggle('error', error); }
 function updatePreview() {
@@ -105,7 +104,7 @@ function readForm(): Partial<Settings> | null {
   numericKeys.forEach(key => document.querySelector<HTMLInputElement>(`#${key}`)!.setCustomValidity(''));
   const values = Object.fromEntries(numericKeys.map(key => [key, Number(document.querySelector<HTMLInputElement>(`#${key}`)!.value)])) as Pick<Settings, typeof numericKeys[number]>;
   if (values.minSpeed > values.maxSpeed) document.querySelector<HTMLInputElement>('#minSpeed')!.setCustomValidity('Minimum speed must be no greater than maximum speed.');
-  for (const key of ['defaultSpeed', 'preferredSpeed', 'resetSpeed'] as const) {
+  for (const key of ['defaultSpeed', 'preferredSpeed'] as const) {
     if (values[key] < values.minSpeed || values[key] > values.maxSpeed) document.querySelector<HTMLInputElement>(`#${key}`)!.setCustomValidity('Choose a speed within your minimum and maximum limits.');
   }
   if (!form.reportValidity()) { feedback('Check your speed values before saving.', true); return null; }

@@ -82,7 +82,7 @@ try {
   await page.locator('h1').click();
   await page.keyboard.press('g');
   assert.equal(await page.locator('#first').evaluate(video => video.playbackRate), 1.5);
-  await page.keyboard.press('b');
+  await page.keyboard.press('r');
   assert.equal(await page.locator('#first').evaluate(video => video.playbackRate), 1);
   await expand();
   await page.locator('[aria-label="Hide video controls"]').click();
@@ -112,6 +112,15 @@ try {
   await expand();
   await page.locator('[aria-label="Increase video speed"]').first().click();
   assert.equal(await page.locator('#first').evaluate(video => video.playbackRate), 2);
+  await page.locator('h1').click();
+  await page.keyboard.press('r');
+  assert.equal(await page.locator('#first').evaluate(video => video.playbackRate), 1.75, 'reset uses the configured default speed');
+  await expand();
+  await page.locator('[aria-label="Increase video speed"]').first().click();
+  await host.locator('.speed').click();
+  assert.equal(await page.locator('#first').evaluate(video => video.playbackRate), 1.75, 'speed button resets to the configured default speed');
+  await page.locator('h1').click();
+  await page.keyboard.press('d');
   await page.screenshot({ path: '/tmp/glace-content.png' });
   // An arbitrary nested player needs no site-specific selectors. Its own
   // stacking context keeps the pill under page UI even with a raised video.
@@ -275,6 +284,9 @@ try {
   await page.goto(`${base}/options.html`);
   await page.waitForFunction(() => document.querySelector('#app').textContent.length > 100);
   assert.ok(await page.locator('input').count(), 'settings must expose inputs');
+  assert.equal(await page.getByRole('spinbutton', { name: 'Default speed', exact: true }).count(), 1);
+  assert.equal(await page.locator('#resetSpeed').count(), 0);
+  assert.equal(await page.locator('[data-action="default"]').count(), 0);
   assert.equal(await page.locator('#idleOpacity').inputValue(), '0.5');
   for (const [id, value] of [['idleOpacity', '0.35'], ['opacity', '0.9']]) {
     await page.locator(`#${id}`).fill(value);
