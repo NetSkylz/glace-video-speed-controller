@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Glace — Video Speed Controller",
+  "short_name": "Glace",
+  "version": "1.0.0",
+  "description": "A quiet, frosted-glass controller for video speed, custom shortcuts, and picture-in-picture.",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "Glace video controls",
+    "default_popup": "popup.html",
+    "default_icon": {"16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png"}
+  },
+  "icons": {"16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png"},
+  "options_ui": {"page": "options.html", "open_in_tab": true},
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_idle",
+    "all_frames": true,
+    "match_about_blank": true,
+    "match_origin_as_fallback": true
+  }]
+}
