@@ -28,6 +28,12 @@ test('legacy reset speed is discarded in favor of the shared default speed', () 
   assert.equal(settings.defaultSpeed, 1.75);
   assert.equal('resetSpeed' in settings, false);
 });
+test('glass strength defaults and accepts the full clear-to-frosted range', () => {
+  assert.equal(normalizeSettings({}).glassEffect, 0.35);
+  assert.equal(normalizeSettings({ glassEffect: -1 }).glassEffect, 0);
+  assert.equal(normalizeSettings({ glassEffect: 2 }).glassEffect, 1);
+  assert.equal(normalizeSettings({ glassEffect: NaN }).glassEffect, 0.35);
+});
 test('idle opacity defaults for existing settings and normalizes independently of hover opacity', () => {
   assert.equal(normalizeSettings({ opacity: 0.75 }).idleOpacity, 0.5);
   assert.equal(normalizeSettings({ idleOpacity: 0.35, opacity: 0.9 }).idleOpacity, 0.35);

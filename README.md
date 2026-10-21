@@ -30,7 +30,7 @@ The pill appears at the top left of visible videos, including videos inserted as
 
 Shortcuts can be recorded, changed, or cleared in settings. They use physical key codes, so the key's location is consistent across keyboard layouts. They are inactive while typing in inputs or editable content. Assigned shortcuts take precedence over a site's shortcuts when a visible video is available.
 
-Open the toolbar popup for quick settings, then **Personalize Glace** for default and preferred speeds, step, limits, seek distance, shortcuts, controller position and opacity. Remember speed shares your latest rate across videos in this browser profile; disable it to initialize each video at the default speed. A changed default speed applies to already discovered videos.
+Open the toolbar popup for quick settings, then **Personalize Glace** for default and preferred speeds, step, limits, seek distance, shortcuts, controller position, opacity and liquid glass strength. Liquid glass ranges from a transparent background at 0% to fully frosted at 100%, with a 35% default. Remember speed shares your latest rate across videos in this browser profile; disable it to initialize each video at the default speed. A changed default speed applies to already discovered videos.
 
 ## Development and verification
 

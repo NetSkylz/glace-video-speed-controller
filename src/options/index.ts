@@ -1,3 +1,4 @@
+import { setGlassEffect } from '../shared/glass';
 import './style.css';
 import { DEFAULT_SETTINGS, type Settings, type Action } from '../shared/settings';
 import { getSettings, saveSettings, subscribeSettings } from '../shared/storage';
@@ -52,6 +53,7 @@ app.innerHTML = `
       <div class="card">
         ${row('Show controller', 'A small, floating control over your videos.', toggle('showController', 'Show controller'), 'showController')}
         ${row('Position', 'Choose a corner that stays out of your way.', `<select id="position"><option value="top-left">Top left</option><option value="top-right">Top right</option><option value="bottom-left">Bottom left</option><option value="bottom-right">Bottom right</option></select>`, 'position')}
+        ${row('Liquid glass', 'From a clear background to fully frosted glass.', '<div class="range-control"><input id="glassEffect" type="range" min="0" max="1" step="0.01"><output for="glassEffect" id="glassEffect-value">35%</output></div>', 'glassEffect')}
         ${row('Opacity when not hovered', 'How visible the controller is while at rest.', '<div class="range-control"><input id="idleOpacity" type="range" min="0.2" max="1" step="0.01"><output for="idleOpacity" id="idleOpacity-value">50%</output></div>', 'idleOpacity')}
         ${row('Opacity when hovered', 'Also applies while using the keyboard or dragging.', '<div class="range-control"><input id="opacity" type="range" min="0.2" max="1" step="0.01"><output for="opacity" id="opacity-value">86%</output></div>', 'opacity')}
       </div>
@@ -80,6 +82,9 @@ function updatePreview() {
   pill.style.right = position.endsWith('right') ? '24px' : 'auto';
   pill.style.top = position.startsWith('top') ? '52px' : 'auto';
   pill.style.bottom = position.startsWith('bottom') ? '58px' : 'auto';
+  const glassEffect = Number(document.querySelector<HTMLInputElement>('#glassEffect')!.value);
+  setGlassEffect(pill, glassEffect);
+  document.querySelector('#glassEffect-value')!.textContent = `${Math.round(glassEffect * 100)}%`;
   const opacity = (document.querySelector<HTMLInputElement>('#opacity')!).value;
   pill.style.setProperty('--preview-opacity', opacity);
   const idleOpacity = document.querySelector<HTMLInputElement>('#idleOpacity')!.value;
@@ -97,6 +102,7 @@ function render(value: Settings) {
   document.querySelector<HTMLSelectElement>('#position')!.value = value.position;
   document.querySelector<HTMLInputElement>('#opacity')!.value = String(value.opacity);
   document.querySelector<HTMLInputElement>('#idleOpacity')!.value = String(value.idleOpacity);
+  document.querySelector<HTMLInputElement>('#glassEffect')!.value = String(value.glassEffect);
   document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { button.textContent = value.shortcuts[button.dataset.action as Action].code ? formatShortcut(value.shortcuts[button.dataset.action as Action]) : 'Unassigned'; });
   updatePreview();
 }
@@ -108,7 +114,7 @@ function readForm(): Partial<Settings> | null {
     if (values[key] < values.minSpeed || values[key] > values.maxSpeed) document.querySelector<HTMLInputElement>(`#${key}`)!.setCustomValidity('Choose a speed within your minimum and maximum limits.');
   }
   if (!form.reportValidity()) { feedback('Check your speed values before saving.', true); return null; }
-  return { ...values, ...Object.fromEntries(booleanKeys.map(key => [key, document.querySelector<HTMLInputElement>(`#${key}`)!.checked])), position: document.querySelector<HTMLSelectElement>('#position')!.value as Settings['position'], opacity: Number(document.querySelector<HTMLInputElement>('#opacity')!.value), idleOpacity: Number(document.querySelector<HTMLInputElement>('#idleOpacity')!.value) };
+  return { ...values, ...Object.fromEntries(booleanKeys.map(key => [key, document.querySelector<HTMLInputElement>(`#${key}`)!.checked])), position: document.querySelector<HTMLSelectElement>('#position')!.value as Settings['position'], opacity: Number(document.querySelector<HTMLInputElement>('#opacity')!.value), idleOpacity: Number(document.querySelector<HTMLInputElement>('#idleOpacity')!.value), glassEffect: Number(document.querySelector<HTMLInputElement>('#glassEffect')!.value) };
 }
 function persist(patch: Partial<Settings>): Promise<Settings | null> {
   pending++;

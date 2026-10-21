@@ -112,6 +112,17 @@ try {
   await expand();
   await page.locator('[aria-label="Increase video speed"]').first().click();
   assert.equal(await page.locator('#first').evaluate(video => video.playbackRate), 2);
+  for (const strength of [0, 1, 0.35]) {
+    await page.evaluate(async glassEffect => {
+      const { glaceSettings } = await chrome.storage.sync.get('glaceSettings');
+      await chrome.storage.sync.set({ glaceSettings: { ...glaceSettings, glassEffect } });
+    }, strength);
+    await page.waitForFunction(expected => getComputedStyle(document.querySelector('[data-glace-controller]').shadowRoot.querySelector('.pill')).backdropFilter === expected, strength === 0 ? 'none' : `blur(${strength * 40}px) saturate(${1 + strength * 2.3})`);
+    if (strength === 0) {
+      const background = await pill.evaluate(element => getComputedStyle(element).backgroundImage);
+      assert.equal((background.match(/rgba\(255, 255, 255, 0\)/g) || []).length, 3, 'clear glass has no background tint');
+    }
+  }
   await page.locator('h1').click();
   await page.keyboard.press('r');
   assert.equal(await page.locator('#first').evaluate(video => video.playbackRate), 1.75, 'reset uses the configured default speed');
@@ -301,6 +312,13 @@ try {
   await page.waitForFunction(() => getComputedStyle(document.querySelector('#preview-controller')).opacity === '0.35');
   await page.locator('#preview-controller').hover();
   await page.waitForFunction(() => getComputedStyle(document.querySelector('#preview-controller')).opacity === '0.9');
+  for (const strength of ['0', '1']) {
+    await page.locator('#glassEffect').fill(strength);
+    await page.locator('#glassEffect').dispatchEvent('change');
+    await page.waitForFunction(async expected => (await chrome.storage.sync.get('glaceSettings')).glaceSettings?.glassEffect === expected, Number(strength));
+    assert.equal(await page.locator('#glassEffect-value').textContent(), `${Number(strength) * 100}%`);
+    assert.equal(await page.locator('#preview-controller').evaluate(element => getComputedStyle(element).backdropFilter), strength === '0' ? 'none' : 'blur(40px) saturate(3.3)');
+  }
   await page.locator('#defaultSpeed').fill('1.8');
   await page.locator('#defaultSpeed').blur();
   await page.waitForFunction(async () => (await chrome.storage.sync.get('glaceSettings')).glaceSettings?.defaultSpeed === 1.8);

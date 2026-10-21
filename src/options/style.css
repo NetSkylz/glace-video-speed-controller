@@ -20,7 +20,7 @@ h1 { font-size: clamp(29px,3vw,36px); font-weight: 550; letter-spacing: -1.5px; 
 .preview-note { position: absolute; top: 17px; left: 20px; font-size: 9px; letter-spacing: 1.7px; text-transform: uppercase; color: #ffffffcf; }
 .preview-caption { position: absolute; bottom: 20px; left: 23px; color: #fff; z-index: 1; font-size: 12px; letter-spacing: .2px; }
 .preview-caption small { display: block; font-size: 9px; opacity: .7; margin-top: 5px; }
-.speed-pill { position: absolute; top: 62px; right: 24px; z-index: 2; display: flex; gap: 2px; align-items: center; border-radius: 999px; padding: 4px; background: rgba(24,27,35,.86); opacity: var(--preview-idle-opacity,.5); transition: opacity .15s; backdrop-filter: blur(18px) saturate(1.5); border: 1px solid #ffffff3d; box-shadow: 0 4px 16px #0003,inset 0 1px #ffffff12; color: #fff; }
+.speed-pill { position: absolute; top: 62px; right: 24px; z-index: 2; display: flex; gap: 2px; align-items: center; border-radius: 999px; padding: 4px; background: var(--glace-glass-background, transparent); opacity: var(--preview-idle-opacity,.5); transition: opacity .15s; backdrop-filter: var(--glace-glass-filter, blur(14px) saturate(1.8)); -webkit-backdrop-filter: var(--glace-glass-filter, blur(14px) saturate(1.8)); border: 1px solid #ffffff3d; box-shadow: 0 4px 16px #0003,inset 0 1px #ffffff12; color: #fff; }
 .speed-pill:hover { opacity: var(--preview-opacity,.86); }
 .preview-control { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; }
 .preview-control svg { width: 15px; height: 15px; stroke-width: 1.6; }
