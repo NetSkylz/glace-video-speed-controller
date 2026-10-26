@@ -44,11 +44,11 @@ class Glace {
 
   async start(): Promise<void> {
     try {
-      const [settings, remembered] = await Promise.all([
-        getSettings(), chrome.storage.local.get('glaceRememberedSpeed'),
-      ]);
+      const settings = await getSettings();
       if (this.disposed) return;
       this.settings = settings;
+      const remembered = await chrome.storage.local.get('glaceRememberedSpeed');
+      if (this.disposed) return;
       const speed: unknown = remembered.glaceRememberedSpeed;
       if (typeof speed === 'number' && Number.isFinite(speed)) this.lastSpeed = speed;
     } catch { /* Defaults keep the controller usable if extension storage is unavailable. */ }
@@ -273,8 +273,9 @@ class Glace {
     if (!Number.isFinite(speed) || speed <= 0) return;
     this.lastSpeed = speed;
     clearTimeout(this.rememberTimer);
-    this.rememberTimer = setTimeout(() => {
-      void chrome.storage.local.set({ glaceRememberedSpeed: speed }).catch(() => {});
+    this.rememberTimer = setTimeout(async () => {
+      // Access itself can throw synchronously after the extension is reloaded.
+      try { await chrome.storage.local.set({ glaceRememberedSpeed: speed }); } catch { /* Keep the in-memory speed. */ }
     }, 300);
   }
 

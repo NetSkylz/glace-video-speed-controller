@@ -335,6 +335,32 @@ try {
   await page.waitForFunction(() => document.querySelector('#app').textContent.length > 30);
   await page.setViewportSize({ width: 380, height: 650 });
   await page.screenshot({ path: '/tmp/glace-popup.png' });
+  for (const scenario of ['missing at startup', 'invalidated at startup', 'missing after startup', 'rejected save']) {
+    const fallbackPage = await context.newPage();
+    fallbackPage.on('pageerror', error => errors.push(`${scenario}: ${error.message}`));
+    await fallbackPage.goto(base);
+    await fallbackPage.evaluate(scenario => {
+      if (scenario === 'missing at startup') delete chrome.storage;
+      if (scenario === 'invalidated at startup') {
+        chrome.storage.onChanged.addListener = () => { throw new Error('Extension context invalidated.'); };
+        chrome.storage.local.set = () => { throw new Error('Extension context invalidated.'); };
+      }
+      if (scenario === 'rejected save') {
+        chrome.storage.local.set = async () => { throw new Error('Storage unavailable.'); };
+      }
+    }, scenario);
+    await fallbackPage.addScriptTag({ path: 'dist/content.js' });
+    await fallbackPage.locator('[data-glace-controller]').waitFor();
+    if (scenario === 'missing after startup') await fallbackPage.evaluate(() => { delete chrome.storage; });
+    await fallbackPage.locator('.pill').hover();
+    await fallbackPage.locator('[aria-label="Increase video speed"]').click();
+    assert.equal(await fallbackPage.locator('#first').evaluate(video => video.playbackRate), 1.1, scenario);
+    // Let the debounced remembered-speed write run before testing teardown.
+    await fallbackPage.waitForTimeout(400);
+    await fallbackPage.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide')));
+    assert.equal(await fallbackPage.locator('[data-glace-controller]').count(), 0, scenario);
+    await fallbackPage.close();
+  }
   assert.deepEqual(errors, [], 'no unhandled browser exceptions');
   console.log('Browser integration passed: compact hover/focus state, 50% idle opacity, scroll anchoring, hover above transparent player layers and stacking below low-z-index headers, dragging, keyboard movement, resize bounds, speed buttons, shortcuts, editable exclusions including shadow DOM, preferred/default, hide/restore, dynamic feeds, settings propagation, cleanup, unavailable PiP, fullscreen wrapper alignment, options persistence and shortcut conflict handling.');
   const profile = await mkdtemp(join(tmpdir(), 'glace-extension-'));

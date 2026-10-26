@@ -14,6 +14,16 @@ export function subscribeSettings(callback: (settings: Settings) => void): () =>
   const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
     if (area === 'sync' && changes[SETTINGS_KEY]) callback(normalizeSettings(changes[SETTINGS_KEY].newValue));
   };
-  chrome.storage.onChanged.addListener(listener);
-  return () => chrome.storage.onChanged.removeListener(listener);
+  try {
+    const onChanged = globalThis.chrome?.storage?.onChanged;
+    if (!onChanged) return () => {};
+    onChanged.addListener(listener);
+    return () => {
+      // A tab can outlive its extension context after an update or reload.
+      try { onChanged.removeListener(listener); } catch { /* Already disconnected. */ }
+    };
+  } catch {
+    // Keep the controller usable with its current settings if storage is unavailable.
+    return () => {};
+  }
 }
