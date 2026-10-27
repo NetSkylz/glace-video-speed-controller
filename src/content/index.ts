@@ -1,6 +1,6 @@
 import { setGlassEffect } from '../shared/glass';
 import { DEFAULT_SETTINGS, type Action, type Settings } from '../shared/settings';
-import { getSettings, subscribeSettings } from '../shared/storage';
+import { getSettings, getStorageArea, subscribeSettings } from '../shared/storage';
 import { isEditableTarget, matchesShortcut } from '../shared/shortcuts';
 import { controllerCSS } from './controller.css';
 import { clampSpeed, formatSpeed, seekVideo, selectVideo, visibleArea } from './video-utils';
@@ -47,7 +47,7 @@ class Glace {
       const settings = await getSettings();
       if (this.disposed) return;
       this.settings = settings;
-      const remembered = await chrome.storage.local.get('glaceRememberedSpeed');
+      const remembered = await getStorageArea('local').get('glaceRememberedSpeed');
       if (this.disposed) return;
       const speed: unknown = remembered.glaceRememberedSpeed;
       if (typeof speed === 'number' && Number.isFinite(speed)) this.lastSpeed = speed;
@@ -275,7 +275,7 @@ class Glace {
     clearTimeout(this.rememberTimer);
     this.rememberTimer = setTimeout(async () => {
       // Access itself can throw synchronously after the extension is reloaded.
-      try { await chrome.storage.local.set({ glaceRememberedSpeed: speed }); } catch { /* Keep the in-memory speed. */ }
+      try { await getStorageArea('local').set({ glaceRememberedSpeed: speed }); } catch { /* Keep the in-memory speed. */ }
     }, 300);
   }
 

@@ -41,7 +41,7 @@ try {
     });
     window.chrome = {
       storage: { sync: area('sync'), local: area('local'), onChanged: { addListener: callback => listeners.add(callback), removeListener: callback => listeners.delete(callback) } },
-      runtime: { openOptionsPage: async () => {}, getURL: value => value, sendMessage: async () => {} },
+      runtime: { id: 'glace-browser-test', openOptionsPage: async () => {}, getURL: value => value, sendMessage: async () => {} },
       tabs: { query: async () => [] },
     };
   });
@@ -335,7 +335,7 @@ try {
   await page.waitForFunction(() => document.querySelector('#app').textContent.length > 30);
   await page.setViewportSize({ width: 380, height: 650 });
   await page.screenshot({ path: '/tmp/glace-popup.png' });
-  for (const scenario of ['missing at startup', 'invalidated at startup', 'missing after startup', 'rejected save']) {
+  for (const scenario of ['missing at startup', 'invalidated at startup', 'missing after startup', 'invalidated after startup', 'rejected save']) {
     const fallbackPage = await context.newPage();
     fallbackPage.on('pageerror', error => errors.push(`${scenario}: ${error.message}`));
     await fallbackPage.goto(base);
@@ -357,6 +357,9 @@ try {
     assert.equal(await fallbackPage.locator('#first').evaluate(video => video.playbackRate), 1.1, scenario);
     // Let the debounced remembered-speed write run before testing teardown.
     await fallbackPage.waitForTimeout(400);
+    if (scenario === 'invalidated after startup') {
+      await fallbackPage.evaluate(() => { delete chrome.runtime.id; delete chrome.storage; });
+    }
     await fallbackPage.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide')));
     assert.equal(await fallbackPage.locator('[data-glace-controller]').count(), 0, scenario);
     await fallbackPage.close();

@@ -12,7 +12,7 @@ Requires Node.js 24+ and npm.
 4. Choose **Load unpacked** and select this project's `dist` folder.
 5. Refresh existing video tabs. Pin Glace in the toolbar for easy access to its settings.
 
-After changes, rebuild, click **Reload** on the extension card, and refresh the video tab. `npm run dev` rebuilds TypeScript and imported CSS automatically; run a full build after editing files in `public`.
+After changes, rebuild, click **Reload** on the extension card, and refresh any open video tabs so they run the current content script. Do the same after removing and adding the unpacked extension again. `npm run dev` rebuilds TypeScript and imported CSS automatically; run a full build after editing files in `public`.
 
 ## Controls
 
